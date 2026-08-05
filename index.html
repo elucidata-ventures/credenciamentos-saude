@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar de Credenciamentos — avisamos quando a prefeitura abre credenciamento para a sua clínica</title>
+<meta name="description" content="Prefeituras abrem credenciamento para consultas, exames e procedimentos ao longo de todo o ano. O aviso sai em diário oficial. Nós monitoramos a sua região e avisamos você, com o prazo e os requisitos resumidos. R$ 99/mês.">
+<meta property="og:title" content="Radar de Credenciamentos em Saúde">
+<meta property="og:description" content="Nunca mais descubra um credenciamento da prefeitura depois do prazo. Monitoramos a sua região por R$ 99/mês.">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --ink:#101f22; --ink-2:#3c5257; --line:#dde6e8; --bg:#ffffff; --bg-2:#f3f8f9;
+    --brand:#0d6273; --brand-2:#094a58; --accent:#cbeef5; --warn:#8a5a00; --err:#a3231b;
+    --radius:10px; --wrap:960px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
+  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 20px}
+  h1,h2,h3{line-height:1.22;margin:0 0 .5em;letter-spacing:-.015em}
+  h1{font-size:clamp(28px,4.6vw,44px)}
+  h2{font-size:clamp(22px,3vw,30px);margin-top:0}
+  h3{font-size:18px}
+  p{margin:0 0 1em}
+  a{color:var(--brand-2)}
+  .muted{color:var(--ink-2)}
+  .small{font-size:14px}
+
+  header{background:linear-gradient(180deg,#f5fbfc,#ffffff);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:10px;padding:18px 0;font-weight:700;letter-spacing:-.02em}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--brand)}
+  .hero{padding:26px 0 46px}
+  .hero .lede{font-size:clamp(17px,2.1vw,20px);color:var(--ink-2);max-width:62ch}
+  .kicker{display:inline-block;background:var(--accent);color:var(--brand-2);
+    font-size:13px;font-weight:700;padding:5px 11px;border-radius:999px;margin-bottom:16px}
+
+  .btn{display:inline-block;background:var(--brand);color:#fff;border:0;cursor:pointer;
+    font:inherit;font-weight:700;padding:14px 22px;border-radius:var(--radius);text-decoration:none}
+  .btn:hover{background:var(--brand-2)}
+  .btn.block{display:block;width:100%;text-align:center;font-size:17px;padding:16px}
+
+  section{padding:44px 0;border-top:1px solid var(--line)}
+  section.plain{border-top:0}
+  .bg2{background:var(--bg-2)}
+
+  .grid{display:grid;gap:18px}
+  @media(min-width:720px){ .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:1fr 1fr} }
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  .card h3{margin-top:0}
+  .card p:last-child{margin-bottom:0}
+
+  .stats{display:grid;gap:14px;margin:22px 0 0}
+  @media(min-width:640px){ .stats{grid-template-columns:repeat(3,1fr)} }
+  .stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .stat b{display:block;font-size:clamp(24px,3.4vw,32px);letter-spacing:-.02em;color:var(--brand-2)}
+  .stat span{font-size:13px;color:var(--ink-2)}
+
+  ul.check{list-style:none;padding:0;margin:0}
+  ul.check li{position:relative;padding-left:28px;margin-bottom:11px}
+  ul.check li::before{content:"";position:absolute;left:6px;top:.55em;width:7px;height:12px;
+    border:solid var(--brand);border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:720px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg-2);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-2);white-space:nowrap}
+  td.obj{white-space:normal;min-width:280px}
+  tr:last-child td{border-bottom:0}
+
+  .steps{counter-reset:s;list-style:none;padding:0;margin:22px 0 0}
+  .steps li{counter-increment:s;position:relative;padding-left:48px;margin-bottom:18px}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:-2px;width:32px;height:32px;
+    border-radius:50%;background:var(--accent);color:var(--brand-2);font-weight:800;
+    display:flex;align-items:center;justify-content:center}
+  .steps b{display:block}
+
+  .price{display:flex;flex-wrap:wrap;gap:18px}
+  .price .card{flex:1 1 260px}
+  .price .tag{font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+  .price .tag small{font-size:14px;font-weight:600;color:var(--ink-2)}
+
+  form{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  label{display:block;font-weight:600;font-size:14px;margin:0 0 6px}
+  .req{color:var(--err)}
+  input[type=text],input[type=email],select,textarea{width:100%;padding:12px;
+    border:1px solid #ccd9dc;border-radius:8px;font:inherit;background:#fff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
+  .field{margin-bottom:16px}
+  .row{display:grid;gap:16px}
+  @media(min-width:620px){ .row{grid-template-columns:1fr 1fr} }
+  .checkline{display:flex;gap:11px;align-items:flex-start;background:var(--bg-2);
+    border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:16px}
+  .checkline input{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:var(--brand)}
+  .checkline label{margin:0;font-weight:600}
+
+  #status{display:none;margin-top:14px;padding:13px;border-radius:8px;font-size:14.5px}
+  #status.on{display:block}
+  #status.ok{background:#e7f6f9;border:1px solid #93d3e0;color:#094a58}
+  #status.err{background:#fdecea;border:1px solid #f0b3ad;color:var(--err)}
+  #status.info{background:#fff6e5;border:1px solid #f0d9a8;color:var(--warn)}
+
+  footer{border-top:1px solid var(--line);background:var(--bg-2);padding:30px 0;font-size:13.5px;color:var(--ink-2)}
+  footer p{margin:0 0 .5em}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span> Radar de Credenciamentos · <span class="muted" style="font-weight:600">Elucidata</span></div>
+    <div class="hero">
+      <span class="kicker">Para clínicas, laboratórios e consultórios</span>
+      <h1>A prefeitura abriu credenciamento para exames. Você soube pelo diário oficial?</h1>
+      <p class="lede">
+        Ninguém soube. O chamamento é publicado, fica aberto por 15 ou 30 dias e encerra — e a clínica
+        que se inscreveu passa os próximos anos atendendo e faturando pelo convênio. Quem não viu, espera
+        o próximo edital.
+      </p>
+      <p class="lede">
+        <strong>Nós monitoramos os credenciamentos de saúde da sua região e te avisamos quando abre</strong>
+        — com o prazo, o que o edital exige e o link do documento oficial.
+      </p>
+      <p><a class="btn" href="#pedir">Ver o que está aberto na minha região</a></p>
+    </div>
+  </div>
+</header>
+
+<section class="plain">
+  <div class="wrap">
+    <h2>Credenciamento é o contrato que ninguém disputa no preço</h2>
+    <div class="grid g3" style="margin-top:22px">
+      <div class="card">
+        <h3>Não é licitação de menor preço</h3>
+        <p class="muted">No credenciamento a prefeitura não escolhe um vencedor: ela credencia <em>todos</em> os
+          prestadores que cumprem os requisitos e paga por tabela. Você não briga com concorrente por centavo
+          — você só precisa estar inscrito no prazo.</p>
+      </div>
+      <div class="card">
+        <h3>O faturamento é recorrente</h3>
+        <p class="muted">Um credenciamento não é uma venda avulsa: é um cadastro que costuma valer por
+          12 meses ou mais, com atendimentos encaminhados ao longo de todo o período.</p>
+      </div>
+      <div class="card">
+        <h3>E a informação está escondida à vista</h3>
+        <p class="muted">É tudo público — e é exatamente isso que faz passar batido. Está espalhado em diários
+          oficiais de centenas de municípios, em PDF, sem aviso para quem interessa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg2">
+  <div class="wrap">
+    <h2>Está aberto agora, perto de você</h2>
+    <p class="muted" style="max-width:64ch">
+      Estes são chamamentos e credenciamentos de saúde com inscrição aberta neste momento, coletados das
+      fontes oficiais de contratação pública. É a mesma lista que o assinante recebe por e-mail — aqui
+      sem filtro de região.
+    </p>
+
+    <div class="stats" id="stats">
+      <div class="stat"><b data-stat="abertos">—</b><span>credenciamentos de saúde abertos hoje</span></div>
+      <div class="stat"><b data-stat="mes">—</b><span>novos por mês, em média</span></div>
+      <div class="stat"><b data-stat="coleta">—</b><span>data desta coleta</span></div>
+    </div>
+
+    <div class="tablewrap" style="margin-top:18px">
+      <table>
+        <thead>
+          <tr><th>Município/UF</th><th>Órgão</th><th>Objeto</th><th>Inscrições até</th><th>Edital</th></tr>
+        </thead>
+        <tbody id="amostra">
+          <tr><td colspan="5" class="obj muted" style="padding:16px">Carregando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted" style="margin-top:12px" id="amostra-nota"></p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Como funciona</h2>
+    <ol class="steps">
+      <li><b>Você diz onde atende e o que faz.</b>
+        Cidade e região, e se a clínica faz consultas, exames laboratoriais, imagem, odontologia,
+        fisioterapia ou fornece OPME.</li>
+      <li><b>Nós varremos as publicações oficiais todos os dias.</b>
+        Chamamento público, credenciamento e afins — filtrados por objeto de saúde e pela sua região.</li>
+      <li><b>Quando aparece algo seu, chega um e-mail.</b>
+        Órgão, objeto, <strong>data limite de inscrição</strong>, documentos exigidos em resumo e o link do
+        edital original. Sem login, sem portal para você lembrar de visitar.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="bg2">
+  <div class="wrap">
+    <h2>Preço</h2>
+    <div class="price" style="margin-top:20px">
+      <div class="card" style="border-color:var(--brand);border-width:2px">
+        <h3>Assinatura</h3>
+        <p class="tag">R$&nbsp;99 <small>/ mês</small></p>
+        <ul class="check small" style="margin-top:14px">
+          <li>Monitoramento da sua cidade e da sua região</li>
+          <li>Alerta por e-mail no dia da publicação</li>
+          <li>Resumo dos requisitos e do prazo de cada edital</li>
+          <li>Sem fidelidade — cancela quando quiser</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>O que isto não é</h3>
+        <p class="muted small">Não somos assessoria: não montamos a sua documentação, não protocolamos a
+          inscrição e não temos como garantir que você será credenciado — isso depende de você cumprir os
+          requisitos do edital. O que entregamos é <strong>o aviso a tempo</strong>, que é onde a
+          oportunidade costuma se perder.</p>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:16px">
+      Nota fiscal emitida pela Elucidata. Preço publicado nesta página — sem "fale com um consultor".
+    </p>
+  </div>
+</section>
+
+<section id="pedir">
+  <div class="wrap">
+    <h2>Quero ver os credenciamentos da minha região</h2>
+    <p class="muted" style="max-width:62ch">
+      Diga onde sua clínica atende e o que ela faz. Nós montamos a lista do que está aberto agora na sua
+      região e mandamos para você — de graça, sem compromisso.
+    </p>
+
+    <form id="lead" novalidate style="margin-top:22px">
+      <div class="row">
+        <div class="field">
+          <label for="nome">Seu nome <span class="req">*</span></label>
+          <input type="text" id="nome" name="nome" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="email">E-mail <span class="req">*</span></label>
+          <input type="email" id="email" name="email" autocomplete="email" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="clinica">Nome da clínica, laboratório ou consultório <span class="req">*</span></label>
+          <input type="text" id="clinica" name="clinica" autocomplete="organization" required>
+        </div>
+        <div class="field">
+          <label for="cidade">Cidade e estado onde atende <span class="req">*</span></label>
+          <input type="text" id="cidade" name="cidade" placeholder="ex.: Sorocaba/SP" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="servicos">O que sua clínica oferece <span class="req">*</span></label>
+        <textarea id="servicos" name="servicos" rows="2" required
+          placeholder="ex.: exames laboratoriais e ultrassonografia — atendo Sorocaba e cidades num raio de 60 km"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="experiencia">Já se credenciou em alguma prefeitura?</label>
+        <select id="experiencia" name="experiencia">
+          <option value="">Escolha uma opção</option>
+          <option>Sim, já sou credenciado hoje</option>
+          <option>Já fui, mas não sou mais</option>
+          <option>Nunca, mas tenho interesse</option>
+          <option>Nunca soube que era possível</option>
+        </select>
+      </div>
+
+      <div class="checkline">
+        <input type="checkbox" id="assinar" name="assinar">
+        <label for="assinar">Quero assinar por R$&nbsp;99/mês e receber os alertas da minha região —
+          me avise quando abrir.</label>
+      </div>
+
+      <button class="btn block" type="submit" id="send">Ver o que está aberto na minha região</button>
+      <div id="status" role="status" aria-live="polite"></div>
+
+      <p class="small muted" style="margin:14px 0 0">
+        Usamos seus dados só para montar e enviar essa lista e falar com você sobre ela.
+        Sem repasse a terceiros, sem lista de disparo.
+      </p>
+    </form>
+  </div>
+</section>
+
+<section class="bg2">
+  <div class="wrap">
+    <h2>Perguntas honestas</h2>
+    <div class="grid g2" style="margin-top:20px">
+      <div class="card">
+        <h3>Se a informação é pública, por que pagar?</h3>
+        <p class="muted">Porque achar não é o trabalho — <em>vigiar</em> é. São centenas de municípios
+          publicando em datas imprevisíveis, e o custo de perder o prazo é um ano inteiro sem o convênio.
+          A informação é gratuita para quem tem tempo de procurar todo dia.</p>
+      </div>
+      <div class="card">
+        <h3>Vocês garantem que eu vou ser credenciado?</h3>
+        <p class="muted">Não, e desconfie de quem garantir. Quem decide é o órgão, segundo os requisitos do
+          edital. Nós garantimos que você <strong>fica sabendo enquanto o prazo está aberto</strong>.</p>
+      </div>
+      <div class="card">
+        <h3>Vocês cobrem a minha cidade?</h3>
+        <p class="muted" id="faq-cobertura">Monitoramos as publicações oficiais de contratação pública, que
+          hoje concentram a maior parte dos chamamentos municipais. A densidade varia por região — quando você
+          se cadastrar, a primeira coisa que dizemos é <strong>quantos editais apareceram na sua região nos
+          últimos meses</strong>. Se for pouco, dizemos que é pouco.</p>
+      </div>
+      <div class="card">
+        <h3>Vocês são ligados à prefeitura?</h3>
+        <p class="muted">Não. Somos um serviço privado de monitoramento de publicações oficiais. Não temos
+          vínculo com nenhum órgão público e não intermediamos nada com eles.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Elucidata</strong> · Radar de Credenciamentos — monitoramento de chamamentos públicos de saúde.</p>
+    <p>Dados de origem pública (portais oficiais de contratação pública e diários oficiais).
+      Não temos vínculo com nenhum órgão público.</p>
+    <p>Trabalhamos apenas com dados de pessoa jurídica e de órgão público. Nenhum dado pessoal de
+      profissional de saúde é coletado.</p>
+    <p>Esta página está em validação com as primeiras clínicas: o cadastro é para receber a lista da sua
+      região e conversar.</p>
+  </div>
+</footer>
+
+<script>
+  // Endpoint de captura do pré-cadastro. Enquanto vazio, o formulário NÃO finge cadastro.
+  // É a ÚNICA linha a mudar quando o endpoint existir (ver pendência de captura no PENDENCIAS.csv).
+  const FORM_ENDPOINT = "";
+
+  // Credenciamentos REAIS abertos agora + números da coleta (preenchido por pipeline/credenciamentos.py
+  // → data/amostra_landing.json). Enquanto for null, a página esconde os blocos em vez de inventar dado.
+  const DADOS = null;
+
+  (function () {
+    // ---- prova: só mostra o que foi apurado de verdade ----
+    var tb = document.getElementById('amostra');
+    if (DADOS && DADOS.itens && DADOS.itens.length) {
+      var set = function (k, v) {
+        var el = document.querySelector('[data-stat="' + k + '"]');
+        if (el && v) el.textContent = v;
+      };
+      set('abertos', DADOS.abertos_formatado);
+      set('mes', DADOS.novos_por_mes_formatado);
+      set('coleta', DADOS.data_coleta);
+
+      tb.innerHTML = '';
+      DADOS.itens.forEach(function (it) {
+        var tr = document.createElement('tr');
+
+        var cells = [
+          { txt: (it.municipio || '—') + (it.uf ? '/' + it.uf : '') },
+          { txt: it.orgao || '—' },
+          { txt: it.objeto_curto || '—', cls: 'obj' },
+          { txt: it.encerramento || '—' }
+        ];
+        cells.forEach(function (c) {
+          var td = document.createElement('td');
+          if (c.cls) td.className = c.cls;
+          td.textContent = c.txt;
+          tr.appendChild(td);
+        });
+
+        var td = document.createElement('td');
+        if (it.link) {
+          var a = document.createElement('a');
+          a.href = it.link; a.target = '_blank'; a.rel = 'noopener noreferrer';
+          a.textContent = 'abrir';
+          td.appendChild(a);
+        } else { td.textContent = '—'; }
+        tr.appendChild(td);
+
+        tb.appendChild(tr);
+      });
+
+      if (DADOS.nota) document.getElementById('amostra-nota').textContent = DADOS.nota;
+    } else {
+      document.getElementById('stats').style.display = 'none';
+      tb.innerHTML = '<tr><td colspan="5" class="obj muted" style="padding:16px">' +
+        'A lista da sua região é montada sob medida a partir das publicações oficiais — ' +
+        'peça abaixo e ela chega no seu e-mail.</td></tr>';
+    }
+
+    // ---- formulário ----
+    var form = document.getElementById('lead');
+    var btn = document.getElementById('send');
+    var box = document.getElementById('status');
+
+    function say(kind, msg) {
+      box.className = 'on ' + kind;
+      box.textContent = msg;
+    }
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+
+      var nome = form.nome.value.trim();
+      var email = form.email.value.trim();
+      var clinica = form.clinica.value.trim();
+      var cidade = form.cidade.value.trim();
+      var servicos = form.servicos.value.trim();
+
+      if (!nome || !email || !clinica || !cidade || !servicos) {
+        say('err', 'Preencha nome, e-mail, clínica, cidade e o que vocês oferecem — é o que precisamos para filtrar os editais certos.');
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        say('err', 'Confira o e-mail: ele parece incompleto.');
+        return;
+      }
+
+      // Sem endpoint configurado, não fingimos cadastro.
+      if (!FORM_ENDPOINT) {
+        say('info', 'Estamos finalizando o canal de recebimento — o cadastro abre em algumas horas. ' +
+                    'Seus dados continuam preenchidos aqui; volte e envie de novo. Nada foi registrado ainda.');
+        return;
+      }
+
+      var data = new FormData(form);
+      data.append('origem', 'landing-credenciamentos-saude');
+      data.append('enviado_em', new Date().toISOString());
+      data.set('quer_assinar', form.assinar.checked ? 'sim' : 'nao');
+
+      btn.disabled = true;
+      var label = btn.textContent;
+      btn.textContent = 'Enviando…';
+      box.className = '';
+
+      fetch(FORM_ENDPOINT, { method: 'POST', body: data })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          form.reset();
+          say('ok', 'Recebido. Vamos montar a lista do que está aberto na sua região e mandar para o seu e-mail.');
+        })
+        .catch(function () {
+          say('err', 'Não conseguimos enviar agora. Tente novamente em alguns minutos — seus dados seguem preenchidos.');
+        })
+        .then(function () {
+          btn.disabled = false;
+          btn.textContent = label;
+        });
+    });
+  })();
+</script>
+</body>
+</html>
