@@ -232,19 +232,13 @@
       Diga onde sua clínica atende e o que ela faz. Nós montamos a lista do que está aberto agora na sua
       região e mandamos para você — de graça, sem compromisso.
     </p>
+    <p class="muted" style="max-width:62ch">
+      <strong>Não pedimos o seu nome nem o seu e-mail.</strong> O nome do estabelecimento e a cidade bastam:
+      o contato da clínica é público no CNES (o cadastro nacional do Ministério da Saúde), e é por ele que
+      falamos com você. Menos dado seu na nossa mão, menos coisa para dar errado.
+    </p>
 
     <form id="lead" novalidate style="margin-top:22px">
-      <div class="row">
-        <div class="field">
-          <label for="nome">Seu nome <span class="req">*</span></label>
-          <input type="text" id="nome" name="nome" autocomplete="name" required>
-        </div>
-        <div class="field">
-          <label for="email">E-mail <span class="req">*</span></label>
-          <input type="email" id="email" name="email" autocomplete="email" required>
-        </div>
-      </div>
-
       <div class="row">
         <div class="field">
           <label for="clinica">Nome da clínica, laboratório ou consultório <span class="req">*</span></label>
@@ -283,8 +277,9 @@
       <div id="status" role="status" aria-live="polite"></div>
 
       <p class="small muted" style="margin:14px 0 0">
-        Usamos seus dados só para montar e enviar essa lista e falar com você sobre ela.
-        Sem repasse a terceiros, sem lista de disparo.
+        Não coletamos nome de pessoa, e-mail pessoal nem telefone pessoal — só dados do estabelecimento
+        (razão/nome fantasia, cidade, serviços). Usamos isso só para montar essa lista e falar com a clínica
+        sobre ela, pelo contato público do CNES. Sem repasse a terceiros, sem lista de disparo.
       </p>
     </form>
   </div>
@@ -334,9 +329,10 @@
 </footer>
 
 <script>
-  // Endpoint de captura do pré-cadastro. Enquanto vazio, o formulário NÃO finge cadastro.
-  // É a ÚNICA linha a mudar quando o endpoint existir (ver pendência de captura no PENDENCIAS.csv).
-  const FORM_ENDPOINT = "";
+  // Endpoint de captura do pré-cadastro — tópico público do ntfy.sh: sem conta, sem termo aceito,
+  // custo R$0, e legível por `curl` num heartbeat headless (padrão da venture irmã G001-09).
+  // Colheita durável (o ntfy só retém ~12h): ops/coletar_intencao.py, rodado a cada heartbeat.
+  const FORM_ENDPOINT = "https://ntfy.sh/rcs-g00102-precad-7b2e4d";
 
   // Credenciamentos REAIS abertos agora + números da coleta (preenchido por pipeline/credenciamentos.py
   // → data/amostra_landing.json). Enquanto for null, a página esconde os blocos em vez de inventar dado.
@@ -401,21 +397,29 @@
       box.textContent = msg;
     }
 
+    // Rede de segurança de LGPD: o tópico é público, então NADA que pareça dado pessoal de contato
+    // pode sair daqui. Se o visitante digitar e-mail ou telefone num campo de texto livre, removemos
+    // ANTES de enviar — a superfície de dado pessoal desta captura é, por construção, zero.
+    function limparPII(txt) {
+      return String(txt)
+        .replace(/[^\s@]+@[^\s@]+\.[^\s@]{2,}/g, '[e-mail removido]')
+        .replace(/(\+?\d{2}[\s.-]?)?\(?\d{2}\)?[\s.-]?9?\d{4}[\s.-]?\d{4}/g, '[telefone removido]')
+        .trim();
+    }
+
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
 
-      var nome = form.nome.value.trim();
-      var email = form.email.value.trim();
-      var clinica = form.clinica.value.trim();
-      var cidade = form.cidade.value.trim();
-      var servicos = form.servicos.value.trim();
+      var clinica = limparPII(form.clinica.value);
+      var cidade = limparPII(form.cidade.value);
+      var servicos = limparPII(form.servicos.value);
 
-      if (!nome || !email || !clinica || !cidade || !servicos) {
-        say('err', 'Preencha nome, e-mail, clínica, cidade e o que vocês oferecem — é o que precisamos para filtrar os editais certos.');
+      if (!clinica || !cidade || !servicos) {
+        say('err', 'Preencha o nome do estabelecimento, a cidade e o que vocês oferecem — é o que precisamos para filtrar os editais certos.');
         return;
       }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-        say('err', 'Confira o e-mail: ele parece incompleto.');
+      if (!/[a-zA-Zà-úÀ-Ú]{2}/.test(cidade)) {
+        say('err', 'Confira a cidade e o estado (ex.: Sorocaba/SP).');
         return;
       }
 
@@ -426,21 +430,28 @@
         return;
       }
 
-      var data = new FormData(form);
-      data.append('origem', 'landing-credenciamentos-saude');
-      data.append('enviado_em', new Date().toISOString());
-      data.set('quer_assinar', form.assinar.checked ? 'sim' : 'nao');
+      var payload = {
+        origem: 'landing-credenciamentos-saude',
+        enviado_em: new Date().toISOString(),
+        estabelecimento: clinica,
+        cidade: cidade,
+        servicos: servicos,
+        experiencia: form.experiencia.value || '',
+        quer_assinar: form.assinar.checked ? 'sim' : 'nao'
+      };
 
       btn.disabled = true;
       var label = btn.textContent;
       btn.textContent = 'Enviando…';
       box.className = '';
 
-      fetch(FORM_ENDPOINT, { method: 'POST', body: data })
+      fetch(FORM_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) })
         .then(function (r) {
           if (!r.ok) throw new Error('HTTP ' + r.status);
           form.reset();
-          say('ok', 'Recebido. Vamos montar a lista do que está aberto na sua região e mandar para o seu e-mail.');
+          say('ok', 'Recebido. Vamos montar a lista do que está aberto na região de ' + cidade +
+                    ' e falar com ' + clinica + ' pelo contato público do CNES. ' +
+                    'Se a densidade de editais na sua região for baixa, nós dizemos isso — é a regra da casa.');
         })
         .catch(function () {
           say('err', 'Não conseguimos enviar agora. Tente novamente em alguns minutos — seus dados seguem preenchidos.');
