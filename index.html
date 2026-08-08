@@ -345,7 +345,7 @@
     abertos_formatado: "565",
     novos_por_mes_formatado: "158",
     data_coleta: "06/08/2026",
-    nota: "Amostra de 7 credenciamentos de saúde abertos no PNCP em 06/08/2026 — 565 estavam abertos em MG e 190 em SP nesse dia. O texto do objeto é o do edital oficial, resumido; o link vai para o documento no PNCP, que é público e gratuito. Se na sua região aparecer pouco, nós dizemos que é pouco.",
+    nota: "Amostra de {n} credenciamentos de saúde abertos no PNCP em 06/08/2026 — 565 estavam abertos em MG e 190 em SP nesse dia. O texto do objeto é o do edital oficial, resumido; o link vai para o documento no PNCP, que é público e gratuito. Se na sua região aparecer pouco, nós dizemos que é pouco.",
     itens: [
       { municipio: "Coromandel", uf: "MG", orgao: "Prefeitura / Educação Especial", objeto_curto: "Prestação de serviços de terapia", encerramento: "13/08", link: "https://pncp.gov.br/app/editais/18591149000158/2026/81" },
       { municipio: "Leme", uf: "SP", orgao: "LEMEPREV", objeto_curto: "Serviços de perícias médicas", encerramento: "14/08", link: "https://pncp.gov.br/app/editais/11639339000159/2026/40" },
@@ -359,8 +359,24 @@
 
   (function () {
     // ---- prova: só mostra o que foi apurado de verdade ----
+    // Edital com prazo vencido na tabela DESMENTE o produto (a promessa é justamente não perder
+    // o prazo). Como um heartbeat pode não rodar no dia em que o primeiro item vence, a página
+    // se limpa sozinha em vez de depender de curadoria manual pontual.
+    function vigentes(itens) {
+      if (!itens || !itens.length) return [];
+      var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+      return itens.filter(function (it) {
+        var m = /^(\d{2})\/(\d{2})$/.exec(String(it.encerramento || '').trim());
+        if (!m) return false;                       // sem prazo legível não vai para a página
+        var d = new Date(hoje.getFullYear(), Number(m[2]) - 1, Number(m[1]));
+        // vira o ano quando a data cai muito atrás (tabela de dezembro lida em janeiro)
+        if (d - hoje < -180 * 864e5) d.setFullYear(d.getFullYear() + 1);
+        return d >= hoje;
+      });
+    }
+    var ITENS = vigentes(DADOS && DADOS.itens);
     var tb = document.getElementById('amostra');
-    if (DADOS && DADOS.itens && DADOS.itens.length) {
+    if (ITENS.length) {
       var set = function (k, v) {
         var el = document.querySelector('[data-stat="' + k + '"]');
         if (el && v) el.textContent = v;
@@ -370,7 +386,7 @@
       set('coleta', DADOS.data_coleta);
 
       tb.innerHTML = '';
-      DADOS.itens.forEach(function (it) {
+      ITENS.forEach(function (it) {
         var tr = document.createElement('tr');
 
         var cells = [
@@ -398,7 +414,10 @@
         tb.appendChild(tr);
       });
 
-      if (DADOS.nota) document.getElementById('amostra-nota').textContent = DADOS.nota;
+      if (DADOS.nota) {
+        document.getElementById('amostra-nota').textContent =
+          DADOS.nota.replace('{n}', String(ITENS.length));
+      }
     } else {
       document.getElementById('stats').style.display = 'none';
       tb.innerHTML = '<tr><td colspan="5" class="obj muted" style="padding:16px">' +
