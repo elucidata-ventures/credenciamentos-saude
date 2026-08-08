@@ -113,17 +113,18 @@
     <div class="brand"><span class="dot"></span> Radar de Credenciamentos · <span class="muted" style="font-weight:600">Elucidata</span></div>
     <div class="hero">
       <span class="kicker">Para clínicas, laboratórios e consultórios</span>
-      <h1>A prefeitura abriu credenciamento para exames. Você soube pelo diário oficial?</h1>
+      <h1>Minas Gerais abre cerca de 158 credenciamentos de saúde por mês. Na sua cidade, menos de um.</h1>
       <p class="lede">
-        Ninguém soube. O chamamento é publicado, fica aberto por 15 ou 30 dias e encerra — e a clínica
-        que se inscreveu passa os próximos anos atendendo e faturando pelo convênio. Quem não viu, espera
-        o próximo edital.
+        É por isso que esperar o edital da sua própria cidade não funciona: ele aparece menos de uma vez
+        por mês (medimos — Contagem 0,57/mês, Governador Valadares 0,43, Paracatu 0,29). O volume existe,
+        mas está espalhado pelo estado inteiro, em prefeituras que você não acompanha.
       </p>
       <p class="lede">
-        <strong>Nós monitoramos os credenciamentos de saúde da sua região e te avisamos quando abre</strong>
-        — com o prazo, o que o edital exige e o link do documento oficial.
+        <strong>Nós monitoramos todo o estado e te avisamos dos credenciamentos que cabem no raio que você
+        atende</strong> — com o prazo, o link do documento oficial e <strong>um resumo do que o edital exige
+        de você para se habilitar</strong>. São Paulo: cerca de 54 por mês.
       </p>
-      <p><a class="btn" href="#pedir">Ver o que está aberto na minha região</a></p>
+      <p><a class="btn" href="#pedir">Ver o que está aberto no meu raio</a></p>
     </div>
   </div>
 </header>
@@ -332,7 +333,7 @@
   // Endpoint de captura do pré-cadastro — tópico público do ntfy.sh: sem conta, sem termo aceito,
   // custo R$0, e legível por `curl` num heartbeat headless (padrão da venture irmã G001-09).
   // Colheita durável (o ntfy só retém ~12h): ops/coletar_intencao.py, rodado a cada heartbeat.
-  const FORM_ENDPOINT = "https://ntfy.sh/rcs-g00102-precad-7b2e4d";
+  const FORM_ENDPOINT = "https://captura.elucidata.vc/v1/g001-02";
 
   // Credenciamentos REAIS abertos agora + números da coleta (preenchido por pipeline/credenciamentos.py
   // → data/amostra_landing.json). Enquanto for null, a página esconde os blocos em vez de inventar dado.
@@ -430,22 +431,22 @@
         return;
       }
 
-      var payload = {
+      // Endpoint do fundo (captura.elucidata.vc): form-urlencoded, não JSON.
+      var payload = new URLSearchParams({
         origem: 'landing-credenciamentos-saude',
-        enviado_em: new Date().toISOString(),
         estabelecimento: clinica,
-        cidade: cidade,
+        cidade_uf: cidade,
         servicos: servicos,
         experiencia: form.experiencia.value || '',
-        quer_assinar: form.assinar.checked ? 'sim' : 'nao'
-      };
+        aceite_preco: form.assinar.checked ? 'Sim, a R$99/mes' : 'Interesse sem aceite de preco'
+      });
 
       btn.disabled = true;
       var label = btn.textContent;
       btn.textContent = 'Enviando…';
       box.className = '';
 
-      fetch(FORM_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) })
+      fetch(FORM_ENDPOINT, { method: 'POST', body: payload })
         .then(function (r) {
           if (!r.ok) throw new Error('HTTP ' + r.status);
           form.reset();
