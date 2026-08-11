@@ -163,7 +163,7 @@
     </p>
 
     <div class="stats" id="stats">
-      <div class="stat"><b data-stat="abertos">—</b><span>credenciamentos de saúde abertos hoje</span></div>
+      <div class="stat"><b data-stat="abertos">—</b><span>abertos em MG que uma clínica ou laboratório presta (coleta de 08/08)</span></div>
       <div class="stat"><b data-stat="mes">—</b><span>novos por mês, em média</span></div>
       <div class="stat"><b data-stat="coleta">—</b><span>data desta coleta</span></div>
     </div>
@@ -341,15 +341,15 @@
 
   // Credenciamentos REAIS abertos agora + números da coleta (preenchido por pipeline/credenciamentos.py
   // → data/amostra_landing.json). Enquanto for null, a página esconde os blocos em vez de inventar dado.
-  // Editais REAIS do PNCP (coleta 06/08/2026, modalidade 12 = Credenciamento, objeto de saúde).
+  // Editais REAIS do PNCP (coleta 08/08/2026, classificador v2, modalidade 12 = Credenciamento).
   // Curadoria manual: dos 12 itens coletados, 4 foram DESCARTADOS por o objeto oficial não dizer
   // qual é o serviço ("profissionais especializados do ramo", "serviços técnicos em caráter
   // continuado"). Item ilegível na tabela desmente a promessa em vez de prová-la.
   const DADOS = {
-    abertos_formatado: "565",
+    abertos_formatado: "mais de 440",
     novos_por_mes_formatado: "139",
-    data_coleta: "06/08/2026",
-    nota: "Amostra de {n} credenciamentos de saúde abertos no PNCP em 06/08/2026 — 565 estavam abertos em MG e 190 em SP nesse dia. O texto do objeto é o do edital oficial, resumido; o link vai para o documento no PNCP, que é público e gratuito. Se na sua região aparecer pouco, nós dizemos que é pouco.",
+    data_coleta: "08/08/2026",
+    nota: "Amostra de {n} credenciamentos de saúde abertos no PNCP. Na coleta de 08/08/2026 havia mais de 440 abertos em MG e mais de 135 em SP — contando só os que uma clínica ou laboratório privado de fato presta (excluímos, por exemplo, compra de medicamento e serviço administrativo). O texto do objeto é o do edital oficial, resumido; o link vai para o documento no PNCP, que é público e gratuito. Se na sua região aparecer pouco, nós dizemos que é pouco.",
     itens: [
       { municipio: "Coromandel", uf: "MG", orgao: "Prefeitura / Educação Especial", objeto_curto: "Prestação de serviços de terapia", encerramento: "13/08", link: "https://pncp.gov.br/app/editais/18591149000158/2026/81" },
       { municipio: "Leme", uf: "SP", orgao: "LEMEPREV", objeto_curto: "Serviços de perícias médicas", encerramento: "14/08", link: "https://pncp.gov.br/app/editais/11639339000159/2026/40" },
