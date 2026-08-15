@@ -164,7 +164,7 @@
     </p>
 
     <div class="stats" id="stats">
-      <div class="stat"><b data-stat="abertos">—</b><span>abertos em MG que uma clínica ou laboratório presta (coleta de 08/08)</span></div>
+      <div class="stat"><b data-stat="abertos">—</b><span>abertos em MG que uma clínica ou laboratório presta (verificado em 15/08)</span></div>
       <div class="stat"><b data-stat="mes">—</b><span>novos por mês, em média</span></div>
       <div class="stat"><b data-stat="coleta">—</b><span>data desta coleta</span></div>
     </div>
@@ -510,23 +510,34 @@
 
   // Credenciamentos REAIS abertos agora + números da coleta (preenchido por pipeline/credenciamentos.py
   // → data/amostra_landing.json). Enquanto for null, a página esconde os blocos em vez de inventar dado.
-  // Editais REAIS do PNCP (coleta 08/08/2026, classificador v2, modalidade 12 = Credenciamento).
+  // Editais REAIS do PNCP (censo 05/08/2026, classificador v2, modalidade 12 = Credenciamento).
+  // Vitrine de 15/08/2026: cada um dos 14 foi reconsultado NA API do PNCP no dia, e órgão,
+  // objeto, prazo e link saem todos do MESMO registro (`orgaoEntidade.razaoSocial` +
+  // `objetoCompra` literal) — nunca de junção por nome de município, que foi o defeito que
+  // produziu 16 frases falsas em 39 no lote de abordagem em 14/08.
   // Curadoria manual: dos 12 itens coletados, 4 foram DESCARTADOS por o objeto oficial não dizer
   // qual é o serviço ("profissionais especializados do ramo", "serviços técnicos em caráter
   // continuado"). Item ilegível na tabela desmente a promessa em vez de prová-la.
   const DADOS = {
-    abertos_formatado: "mais de 400",
+    abertos_formatado: "mais de 440",
     novos_por_mes_formatado: "139",
-    data_coleta: "08/08/2026",
-    nota: "Amostra de {n} credenciamentos de saúde abertos no PNCP. Na coleta de 08/08/2026 havia mais de 400 abertos em MG e mais de 130 em SP — contando só os que uma clínica ou laboratório privado de fato presta (excluímos, por exemplo, compra de medicamento e serviço administrativo). O texto do objeto é o do edital oficial, resumido; o link vai para o documento no PNCP, que é público e gratuito. Se na sua região aparecer pouco, nós dizemos que é pouco.",
+    data_coleta: "15/08/2026",
+    nota: "Amostra de {n} credenciamentos de saúde abertos no PNCP. Na verificação de 15/08/2026 havia mais de 440 abertos em MG e mais de 130 em SP — contando só os que uma clínica ou laboratório privado de fato presta (excluímos, por exemplo, compra de medicamento e serviço administrativo). O texto do objeto é trecho literal do edital oficial; o link vai para o documento no PNCP, que é público e gratuito. Se na sua região aparecer pouco, nós dizemos que é pouco.",
     itens: [
-      { municipio: "Coromandel", uf: "MG", orgao: "Prefeitura / Educação Especial", objeto_curto: "Prestação de serviços de terapia", encerramento: "13/08", link: "https://pncp.gov.br/app/editais/18591149000158/2026/81" },
-      { municipio: "Leme", uf: "SP", orgao: "LEMEPREV", objeto_curto: "Serviços de perícias médicas", encerramento: "14/08", link: "https://pncp.gov.br/app/editais/11639339000159/2026/40" },
-      { municipio: "Perdigão", uf: "MG", orgao: "Prefeitura Municipal", objeto_curto: "Serviços de radiologia e diagnóstico", encerramento: "19/08", link: "https://pncp.gov.br/app/editais/18301051000119/2026/82" },
-      { municipio: "Arujá", uf: "SP", orgao: "Prefeitura Municipal", objeto_curto: "Médicos generalistas e psiquiátricos", encerramento: "21/08", link: "https://pncp.gov.br/app/editais/56901275000150/2026/306" },
-      { municipio: "Poços de Caldas", uf: "MG", orgao: "Consórcio Intermunicipal de Saúde (CISMARPA)", objeto_curto: "Cirurgias eletivas de catarata", encerramento: "24/08", link: "https://pncp.gov.br/app/editais/01990521000104/2026/5" },
-      { municipio: "Nova Serrana", uf: "MG", orgao: "Prefeitura Municipal", objeto_curto: "Exames de ultrassonografia obstétrica", encerramento: "26/08", link: "https://pncp.gov.br/app/editais/18291385000159/2026/144" },
-      { municipio: "Agudos", uf: "SP", orgao: "Prefeitura Municipal", objeto_curto: "Neuropediatria, neurologia e psiquiatria", encerramento: "01/09", link: "https://pncp.gov.br/app/editais/46137444000174/2026/662" }
+      { municipio: "Santa Efigênia de Minas", uf: "MG", orgao: "Prefeitura Municipal", objeto_curto: "prestação de serviços Exames Laboratoriais", encerramento: "30/09", encerramento_iso: "2026-09-30", link: "https://pncp.gov.br/app/editais/18307462000111/2026/23" },
+      { municipio: "Igarapava", uf: "SP", orgao: "Prefeitura Municipal", objeto_curto: "PRESTAÇÃO DE SERVIÇOS MÉDICOS, COMPREENDENDO 20 (VINTE) TIPOS DE ESPECIALIDADES MÉDICAS", encerramento: "27/11", encerramento_iso: "2026-11-27", link: "https://pncp.gov.br/app/editais/45324290000167/2026/53" },
+      { municipio: "Poços de Caldas", uf: "MG", orgao: "Consorcio Intermunic.Saude Munic.Microregiao Alto R.Pardo", objeto_curto: "SERVIÇOS COMPLEMENTARES DE EXAMES DE IMAGENS DE MÉDIA E ALTA COMPLEXIDADE", encerramento: "04/12", encerramento_iso: "2026-12-04", link: "https://pncp.gov.br/app/editais/01990521000104/2026/1" },
+      { municipio: "Andrelândia", uf: "MG", orgao: "Prefeitura Municipal", objeto_curto: "realização de ultrassonografias para prestação de serviço no município de Andrelândia", encerramento: "15/12", encerramento_iso: "2026-12-15", link: "https://pncp.gov.br/app/editais/18682930000138/2026/48" },
+      { municipio: "Nanuque", uf: "MG", orgao: "Prefeitura Municipal", objeto_curto: "PRESTAÇÃO DE SERVIÇOS EM REALIZAÇÃO DE SESSÕES DE FISIOTERAPIA", encerramento: "31/12", encerramento_iso: "2026-12-31", link: "https://pncp.gov.br/app/editais/18398974000130/2026/23" },
+      { municipio: "Ibertioga", uf: "MG", orgao: "Prefeitura Municipal", objeto_curto: "prestação de serviços odontológicos nas áreas de odontopediatria e endodontia", encerramento: "31/12", encerramento_iso: "2026-12-31", link: "https://pncp.gov.br/app/editais/18094839000100/2026/24" },
+      { municipio: "São Paulo", uf: "SP", orgao: "Instituto de Assistencia Medica Ao Servidor Publico Estadual", objeto_curto: "consultas médicas em regime ambulatorial, por clínicas e consultórios médicos", encerramento: "31/12", encerramento_iso: "2026-12-31", link: "https://pncp.gov.br/app/editais/60747318000162/2026/262" },
+      { municipio: "Brodowski", uf: "SP", orgao: "Prefeitura Municipal", objeto_curto: "serviços especializados em Diagnóstico por Imagem e Exames Complementares", encerramento: "31/12", encerramento_iso: "2026-12-31", link: "https://pncp.gov.br/app/editais/45301652000102/2026/482" },
+      { municipio: "Martinho Campos", uf: "MG", orgao: "Prefeitura Municipal", objeto_curto: "SERVIÇOS ESPECIALIZADOS NAS ÁREAS DE PSICOLOGIA, NUTRIÇÃO E FISIOTERAPIA", encerramento: "31/12", encerramento_iso: "2026-12-31", link: "https://pncp.gov.br/app/editais/18315234000193/2026/128" },
+      { municipio: "Salinas", uf: "MG", orgao: "Prefeitura Municipal", objeto_curto: "serviços médicos especializados para realização de cirurgias ortopédicas", encerramento: "18/01", encerramento_iso: "2027-01-18", link: "https://pncp.gov.br/app/editais/24359333000170/2026/9" },
+      { municipio: "Pouso Alegre", uf: "MG", orgao: "Consorcio Intermunicipal de Saude dos Municipios da Microrregiao do Medio Sapucai - Cisamesp", objeto_curto: "prestação de serviços consistentes na realização de procedimentos oftalmológicos", encerramento: "01/02", encerramento_iso: "2027-02-01", link: "https://pncp.gov.br/app/editais/01080759000194/2026/3" },
+      { municipio: "Penápolis", uf: "SP", orgao: "Consorcio Intermunicipal da Microrregiao de Penapolis", objeto_curto: "exames de Tomografias Computadorizadas e Angiotomografias", encerramento: "02/02", encerramento_iso: "2027-02-02", link: "https://pncp.gov.br/app/editais/55750301000124/2026/1" },
+      { municipio: "Tambaú", uf: "SP", orgao: "Prefeitura Municipal", objeto_curto: "EXAMES LAUDADOS EM RESSONÂNCIA MAGNÉTICA E TOMOGRAFIA COMPUTADORIZADA", encerramento: "05/02", encerramento_iso: "2027-02-05", link: "https://pncp.gov.br/app/editais/46373445000118/2026/12" },
+      { municipio: "Passos", uf: "MG", orgao: "Prefeitura Municipal", objeto_curto: "Credenciamento de Laboratórios de Análises Clínicas/Patologia Clínica", encerramento: "10/02", encerramento_iso: "2027-02-10", link: "https://pncp.gov.br/app/editais/18241745000108/2026/3" }
     ]
   };
 
@@ -535,10 +546,22 @@
     // Edital com prazo vencido na tabela DESMENTE o produto (a promessa é justamente não perder
     // o prazo). Como um heartbeat pode não rodar no dia em que o primeiro item vence, a página
     // se limpa sozinha em vez de depender de curadoria manual pontual.
+    // `encerramento` é só rótulo de tela (DD/MM). Quem decide vigência é `encerramento_iso`
+    // (AAAA-MM-DD), porque DD/MM não carrega o ano: em 15/08/2026 um prazo real de
+    // 16/02/2027 era lido como 2027-02-16 -> 2026-02-16, caía do lado "vencido" e a página
+    // ESCONDIA um edital aberto, sem avisar ninguém (medido em 15/08: 264 de 387 candidatos
+    // qualificados eram invisíveis por isso). Falha em esconder é menos grave que falha em
+    // publicar prazo vencido, mas continua sendo a página mentindo por omissão.
     function vigentes(itens) {
       if (!itens || !itens.length) return [];
       var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
       return itens.filter(function (it) {
+        var iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(it.encerramento_iso || '').trim());
+        if (iso) {
+          return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3])) >= hoje;
+        }
+        // fallback para item legado sem data completa: mantém o comportamento antigo,
+        // que erra para o lado de esconder, nunca para o lado de publicar vencido.
         var m = /^(\d{2})\/(\d{2})$/.exec(String(it.encerramento || '').trim());
         if (!m) return false;                       // sem prazo legível não vai para a página
         var d = new Date(hoje.getFullYear(), Number(m[2]) - 1, Number(m[1]));
